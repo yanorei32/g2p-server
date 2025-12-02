@@ -41,6 +41,7 @@ pub fn convert_text(
                 };
 
                 let hiragana = crate::utils::katakana_to_hiragana(reading);
+                let hiragana = hiragana.replace("*", " ");
                 result.push_str(&hiragana);
             }
         } else {
