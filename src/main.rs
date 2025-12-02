@@ -11,6 +11,9 @@ use clap::Parser;
 use lingua::{Language, LanguageDetector, LanguageDetectorBuilder};
 use vibrato::Dictionary;
 
+#[cfg(unix)]
+use tokio::signal::unix::{signal, SignalKind};
+
 #[derive(Clone)]
 pub struct AppState {
     pub tokenizer: Arc<vibrato::Tokenizer>,
@@ -64,7 +67,26 @@ async fn main() -> anyhow::Result<()> {
     // Start server
     let listener = tokio::net::TcpListener::bind(&args.listen).await?;
     println!("Listening on {}", listener.local_addr()?);
-    axum::serve(listener, app).await?;
+
+    #[cfg(unix)]
+    let mut sigterm = signal(SignalKind::terminate()).unwrap();
+
+    #[cfg(unix)]
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => (),
+        _ = sigterm.recv() => (),
+        result = axum::serve(listener, app) => {
+            result?;
+        }
+    }
+
+    #[cfg(not(unix))]
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => (),
+        result = axum::serve(listener, app) => {
+            result?;
+        }
+    }
 
     Ok(())
 }
