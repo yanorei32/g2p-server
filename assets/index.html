@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=UTF-8>
+		<meta name=viewport content="width=device-width,initial-scale=1">
+		<title>G2P Server</title>
+		<style>
+			html, body {
+				width: 100%;
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+
+			.container {
+				max-width: 800px;
+				margin: auto;
+			}
+
+			#text, #result {
+				width: calc(100% - 10px);
+				height: 10em;
+			}
+		</style>
+	</head>
+	<body>
+		<div class=container>
+			<h1>G2P Server</h1>
+
+			<textarea id=text placeholder="Grapheme to Phoneme"></textarea>
+			<p>
+				<select id=style>
+					<option value=default>Default</option>
+					<option value=ko>Korean</option>
+				</select>
+				<button id=g2p_button>G2P</button>
+			</p>
+			<textarea id=result></textarea>
+			<script>
+				const text = document.getElementById("text");
+				const result = document.getElementById("result");
+				const button = document.getElementById("g2p_button");
+				const styleSelect = document.getElementById("style");
+
+				button.addEventListener("click", async () => {
+					const inputText = text.value;
+					const style = styleSelect.value;
+
+					const response = await fetch("/api/g2p", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({ text: inputText, style: style })
+					});
+
+					if (response.status != 200) {
+						alert(response.status + " " + response.statusText + "\n" + await response.text());
+						return;
+					}
+
+					const data = await response.json();
+					result.value = data.text;
+			</script>
+		</div>
+	</body>
+</html>
