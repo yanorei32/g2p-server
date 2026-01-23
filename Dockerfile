@@ -14,7 +14,7 @@ RUN wget https://github.com/daac-tools/vibrato/releases/download/v0.5.0/unidic-c
 	mkdir /usr/share/lingua/ && \
 	mv unidic-cwj-3_1_1 /usr/share/lingua/
 
-FROM rust:1.92.0 AS build-env
+FROM rust:1.93.0 AS build-env
 LABEL maintainer="yanorei32"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
